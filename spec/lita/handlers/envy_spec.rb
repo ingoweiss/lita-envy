@@ -24,6 +24,27 @@ describe Lita::Handlers::Envy, lita_handler: true do
       expect(replies.first).to eq("ok")
     end
 
+    it "should not change the user if the environment is already in use" do
+      subject.redis.hset('environments:ENV123', 'user', 'Alicia')
+      carl = Lita::User.create(123, name: "Carl")
+      send_command('started using env ENV123', :as => carl)
+      expect(subject.redis.hget('environments:ENV123', 'user')).to eq("Alicia")
+    end
+
+    it "should notify the user if the environment is already in use" do
+      subject.redis.hset('environments:ENV123', 'user', 'Alicia')
+      carl = Lita::User.create(123, name: "Carl")
+      send_command('started using env ENV123', :as => carl)
+      expect(replies.first).to eq("Sorry, ENV123 is currently in use by Alicia")
+    end
+
+    it "should notify the user if the environment is already marked as in use by user" do
+      subject.redis.hset('environments:ENV123', 'user', 'Carl')
+      carl = Lita::User.create(123, name: "Carl")
+      send_command('started using env ENV123', :as => carl)
+      expect(replies.first).to eq("You are already using ENV123")
+    end
+
   end
 
   describe 'stop using environment' do

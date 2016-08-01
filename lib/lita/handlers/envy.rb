@@ -9,8 +9,15 @@ module Lita
 
       def start_using_environment(response)
         env_id = response.matches.first.first
-        redis.hset(['environments', env_id].join(':'), 'user', response.user.name)
-        response.reply('ok')
+        current_user = redis.hget(['environments', env_id].join(':'), 'user')
+        if current_user.nil?
+          redis.hset(['environments', env_id].join(':'), 'user', response.user.name)
+          response.reply('ok')
+        elsif current_user == response.user.name
+          response.reply("You are already using #{env_id}")
+        else
+          response.reply("Sorry, #{env_id} is currently in use by #{current_user}")
+        end
       end
 
       def stop_using_environment(response)
