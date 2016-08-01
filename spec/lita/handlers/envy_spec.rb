@@ -6,6 +6,7 @@ describe Lita::Handlers::Envy, lita_handler: true do
 
     it { is_expected.to route_command("started using env ENV123").to(:start_using_environment)  }
     it { is_expected.to route_command("stopped using env ENV123").to(:stop_using_environment)  }
+    it { is_expected.to route_command("environments").to(:list_environments)  }
 
   end
 
@@ -35,6 +36,22 @@ describe Lita::Handlers::Envy, lita_handler: true do
     it "should confirm" do
       send_command('stopped using env ENV123')
       expect(replies.first).to eq("ok")
+    end
+
+  end
+
+  describe 'list environments' do
+
+    it "should list environments" do
+      subject.redis.hset('environments:ENV123', 'user', 'Alicia')
+      subject.redis.hset('environments:ENV234', 'user', 'Carl')
+      subject.redis.hset('environments:ENV345', 'user', nil)
+      send_command('environments')
+      expect(replies.first.split("\n")).to eq([
+        "ENV123 (Alicia)",
+        "ENV234 (Carl)",
+        "ENV345"
+      ])
     end
 
   end
