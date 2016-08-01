@@ -7,6 +7,7 @@ describe Lita::Handlers::Envy, lita_handler: true do
     it { is_expected.to route_command("started using env ENV123").to(:start_using_environment)  }
     it { is_expected.to route_command("stopped using env ENV123").to(:stop_using_environment)  }
     it { is_expected.to route_command("environments").to(:list_environments)  }
+    it { is_expected.to route_command("remove env ENV123").to(:remove_environment)  }
 
   end
 
@@ -52,6 +53,21 @@ describe Lita::Handlers::Envy, lita_handler: true do
         "ENV234 (Carl)",
         "ENV345"
       ])
+    end
+
+  end
+
+  describe 'remove environment' do
+
+    it "should remove environments" do
+      subject.redis.hset('environments:ENV123', 'user', 'Alicia')
+      send_command('remove env ENV123')
+      expect(subject.redis.keys).to_not include('environments:ENV123')
+    end
+
+    it "should confirm" do
+      send_command('remove env ENV123')
+      expect(replies.first).to eq("ok")
     end
 
   end

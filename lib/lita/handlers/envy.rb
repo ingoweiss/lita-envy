@@ -5,6 +5,7 @@ module Lita
       route /\Astarted using env ([A-Za-z0-9_]+)\Z/,  :start_using_environment, help:  { "started using env [ENV ID]"  => "Mark environment as in use by you"}, command: true
       route /\Astopped using env ([A-Za-z0-9_]+)\Z/,  :stop_using_environment, help:  { "stopped using env [ENV ID]"  => "Mark environment as available"}, command: true
       route /\Aenvironments\Z/,                       :list_environments, help:  { "environments"  => "List environments"}, command: true
+      route /\Aremove env ([A-Za-z0-9_]+)\Z/,         :remove_environment, help:  { "remove env [ENV ID]"  => "Remove environment"}, command: true
 
       def start_using_environment(response)
         env_id = response.matches.first.first
@@ -28,6 +29,12 @@ module Lita
           lines << line
         end
         response.reply(lines.join("\n"))
+      end
+
+      def remove_environment(response)
+        env_id = response.matches.first.first
+        redis.del(['environments', env_id].join(':'))
+        response.reply('ok')
       end
 
       Lita.register_handler(self)
