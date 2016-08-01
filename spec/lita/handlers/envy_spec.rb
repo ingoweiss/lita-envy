@@ -8,6 +8,7 @@ describe Lita::Handlers::Envy, lita_handler: true do
     it { is_expected.to route_command("stopped using env ENV123").to(:stop_using_environment)  }
     it { is_expected.to route_command("environments").to(:list_environments)  }
     it { is_expected.to route_command("remove env ENV123").to(:remove_environment)  }
+    it { is_expected.to route_command("wrestle env ENV123 from Alicia").to(:wrestle_environment_from_user)  }
 
   end
 
@@ -89,6 +90,87 @@ describe Lita::Handlers::Envy, lita_handler: true do
     it "should confirm" do
       send_command('remove env ENV123')
       expect(replies.first).to eq("ok")
+    end
+
+  end
+
+  describe 'wrestle environment from user' do
+
+    context "when environment is currently in use by specified user" do
+
+      before(:each) do
+        subject.redis.hset('environments:ENV123', 'user', 'Alicia')
+      end
+
+      it "should mark environment as in use" do
+        carl = Lita::User.create(123, name: "Carl")
+        send_command('wrestle env ENV123 from Alicia', :as => carl)
+        expect(subject.redis.hget('environments:ENV123', 'user')).to eq("Carl")
+      end
+
+      it "should confirm" do
+        send_command('wrestle env ENV123 from Alicia')
+        expect(replies.first).to eq("ok")
+      end
+
+    end
+
+    context "when environment is currently in use by a user other than the specified one" do
+
+      before(:each) do
+        subject.redis.hset('environments:ENV123', 'user', 'Alicia')
+      end
+
+      it "should not mark environment" do
+        carl = Lita::User.create(123, name: "Carl")
+        send_command('wrestle env ENV123 from Ben', :as => carl)
+        expect(subject.redis.hget('environments:ENV123', 'user')).to eq("Alicia")
+      end
+
+      it "should notify the user" do
+        send_command('wrestle env ENV123 from Ben')
+        expect(replies.first).to eq("Sorry, ENV123 is currently in use by Alicia, not Ben")
+      end
+
+    end
+
+    context "when environment is not currently in use" do
+
+      before(:each) do
+        subject.redis.hset('environments:ENV123', 'user', nil)
+      end
+
+      it "should not mark environment" do
+        carl = Lita::User.create(123, name: "Carl")
+        send_command('wrestle env ENV123 from Ben', :as => carl)
+        expect(subject.redis.hget('environments:ENV123', 'user')).to be_empty
+      end
+
+      it "should notify the user" do
+        send_command('wrestle env ENV123 from Ben')
+        expect(replies.first).to eq("Sorry, ENV123 is not currently in use")
+      end
+
+    end
+
+    context "when environment is already marked as in use by requesting user" do
+
+      before(:each) do
+        subject.redis.hset('environments:ENV123', 'user', 'Carl')
+      end
+
+      it "should not mark environment" do
+        carl = Lita::User.create(123, name: "Carl")
+        send_command('wrestle env ENV123 from Ben', :as => carl)
+        expect(subject.redis.hget('environments:ENV123', 'user')).to eq('Carl')
+      end
+
+      it "should notify the user" do
+        carl = Lita::User.create(123, name: "Carl")
+        send_command('wrestle env ENV123 from Ben', :as => carl)
+        expect(replies.first).to eq("You are already using ENV123")
+      end
+
     end
 
   end
