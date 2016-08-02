@@ -2,8 +2,8 @@ Gem::Specification.new do |spec|
   spec.name          = "lita-envy"
   spec.version       = "0.1.3"
   spec.authors       = ["Ingo Weiss"]
-  spec.email         = ["ingo.weiss@lab49.com"]
-  spec.description   = "Mark environments as in use. Mark environments as available. List environments"
+  spec.email         = ["ingo@ingoweiss.com"]
+  spec.description   = "Helps with management of environment ussage. Adds commands for claiming and releasing environments"
   spec.summary       = "Record and retrieve information about environment usage"
   spec.homepage      = "https://github.com/ingoweiss/lita-envy"
   spec.license       = "MIT"
