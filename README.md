@@ -16,7 +16,10 @@ gem "lita-envy"
 ## Usage
 
 ``` bash
-@bot started using env ENV123
-@bot stopped using env ENV123
+@bot claim ENV123
+@bot release ENV123
+@bot forget ENV123
+@bot envs
+@bot wrestle ENV123 from Jon Doe
 ```
 
