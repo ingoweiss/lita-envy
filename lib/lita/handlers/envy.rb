@@ -11,7 +11,7 @@ module Lita
       def start_using_environment(response)
         env_id = response.matches.first.first
         current_user = redis.hget(['environments', env_id].join(':'), 'user')
-        if current_user.nil?
+        if current_user.nil? || current_user.empty?
           redis.hset(['environments', env_id].join(':'), 'user', response.user.name)
           response.reply('ok')
         elsif current_user == response.user.name
@@ -23,8 +23,16 @@ module Lita
 
       def stop_using_environment(response)
         env_id = response.matches.first.first
-        redis.hset(['environments', env_id].join(':'), 'user', nil)
-        response.reply('ok')
+        current_user = redis.hget(['environments', env_id].join(':'), 'user')
+        if current_user == response.user.name
+          redis.hset(['environments', env_id].join(':'), 'user', nil)
+          response.reply('ok')
+        elsif current_user.nil? || current_user.empty?
+          response.reply("You are not currently using #{env_id}")
+        else
+          response.reply("You are not currently using #{env_id} (#{current_user} is)")
+        end
+
       end
 
       def list_environments(response)
@@ -41,8 +49,17 @@ module Lita
 
       def remove_environment(response)
         env_id = response.matches.first.first
-        redis.del(['environments', env_id].join(':'))
-        response.reply('ok')
+        current_user = redis.hget(['environments', env_id].join(':'), 'user')
+        if current_user == response.user.name
+          response.reply("You are currently using #{env_id}")
+        elsif current_user.nil?
+          response.reply("I do not know about environment #{env_id}")
+        elsif current_user.empty?
+          redis.del(['environments', env_id].join(':'))
+          response.reply('ok')
+        else
+          response.reply("Sorry, #{env_id} is currently in use by #{current_user}")
+        end
       end
 
       def wrestle_environment_from_user(response)
