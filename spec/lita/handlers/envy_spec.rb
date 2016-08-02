@@ -4,11 +4,11 @@ describe Lita::Handlers::Envy, lita_handler: true do
 
   describe 'Routing' do
 
-    it { is_expected.to route_command("started using env ENV123").to(:start_using_environment)  }
-    it { is_expected.to route_command("stopped using env ENV123").to(:stop_using_environment)  }
-    it { is_expected.to route_command("environments").to(:list_environments)  }
-    it { is_expected.to route_command("remove env ENV123").to(:remove_environment)  }
-    it { is_expected.to route_command("wrestle env ENV123 from Alicia").to(:wrestle_environment_from_user)  }
+    it { is_expected.to route_command("claim ENV123").to(:claim_environment)  }
+    it { is_expected.to route_command("release ENV123").to(:release_environment)  }
+    it { is_expected.to route_command("envs").to(:list_environments)  }
+    it { is_expected.to route_command("forget ENV123").to(:forget_environment)  }
+    it { is_expected.to route_command("wrestle ENV123 from Alicia").to(:claim_used_environment)  }
 
   end
 
@@ -22,12 +22,12 @@ describe Lita::Handlers::Envy, lita_handler: true do
 
       it "should mark environment as in use by user" do
         carl = Lita::User.create(123, name: "Carl")
-        send_command('started using env ENV123', :as => carl)
+        send_command('claim ENV123', :as => carl)
         expect(subject.redis.hget('environments:ENV123', 'user')).to eq("Carl")
       end
 
       it "should reply with confirmation" do
-        send_command('started using env ENV123')
+        send_command('claim ENV123')
         expect(replies.first).to eq("ok")
       end
 
@@ -41,12 +41,12 @@ describe Lita::Handlers::Envy, lita_handler: true do
 
       it "should mark environment as in use by user" do
         carl = Lita::User.create(123, name: "Carl")
-        send_command('started using env ENV123', :as => carl)
+        send_command('claim ENV123', :as => carl)
         expect(subject.redis.hget('environments:ENV123', 'user')).to eq("Carl")
       end
 
       it "should reply with confirmation" do
-        send_command('started using env ENV123')
+        send_command('claim ENV123')
         expect(replies.first).to eq("ok")
       end
 
@@ -60,14 +60,14 @@ describe Lita::Handlers::Envy, lita_handler: true do
 
       it "should leave the environment untouched" do
         carl = Lita::User.create(123, name: "Carl")
-        send_command('started using env ENV123', :as => carl)
+        send_command('claim ENV123', :as => carl)
         expect(subject.redis.hget('environments:ENV123', 'user')).to eq("Alicia")
       end
 
       it "should reply with notification" do
         subject.redis.hset('environments:ENV123', 'user', 'Alicia')
         carl = Lita::User.create(123, name: "Carl")
-        send_command('started using env ENV123', :as => carl)
+        send_command('claim ENV123', :as => carl)
         expect(replies.first).to eq("Sorry, ENV123 is currently in use by Alicia")
       end
 
@@ -81,14 +81,14 @@ describe Lita::Handlers::Envy, lita_handler: true do
 
       it "should leave the environment untouched" do
         carl = Lita::User.create(123, name: "Carl")
-        send_command('started using env ENV123', :as => carl)
+        send_command('claim ENV123', :as => carl)
         expect(subject.redis.hget('environments:ENV123', 'user')).to eq("Carl")
       end
 
       it "should reply with notification" do
         subject.redis.hset('environments:ENV123', 'user', 'Carl')
         carl = Lita::User.create(123, name: "Carl")
-        send_command('started using env ENV123', :as => carl)
+        send_command('claim ENV123', :as => carl)
         expect(replies.first).to eq("You are already using ENV123")
       end
 
@@ -106,13 +106,13 @@ describe Lita::Handlers::Envy, lita_handler: true do
 
       it "should mark environment as available" do
         alicia = Lita::User.create(123, name: "Alicia")
-        send_command('stopped using env ENV234', :as => alicia)
+        send_command('release ENV234', :as => alicia)
         expect(subject.redis.hget('environments:ENV234', 'user')).to be_empty
       end
 
       it "should reply with confirmation" do
         alicia = Lita::User.create(123, name: "Alicia")
-        send_command('stopped using env ENV234', :as => alicia)
+        send_command('release ENV234', :as => alicia)
         expect(replies.first).to eq("ok")
       end
 
@@ -126,13 +126,13 @@ describe Lita::Handlers::Envy, lita_handler: true do
 
       it "should leave the environment untouched" do
         alicia = Lita::User.create(123, name: "Alicia")
-        send_command('stopped using env ENV234', :as => alicia)
+        send_command('release ENV234', :as => alicia)
         expect(subject.redis.hget('environments:ENV234', 'user')).to eq('Carl')
       end
 
       it "should reply with notification" do
         alicia = Lita::User.create(123, name: "Alicia")
-        send_command('stopped using env ENV234', :as => alicia)
+        send_command('release ENV234', :as => alicia)
         expect(replies.first).to eq("You are not currently using ENV234 (Carl is)")
       end
 
@@ -146,13 +146,13 @@ describe Lita::Handlers::Envy, lita_handler: true do
 
       it "should leave the environment untouched" do
         alicia = Lita::User.create(123, name: "Alicia")
-        send_command('stopped using env ENV234', :as => alicia)
+        send_command('release ENV234', :as => alicia)
         expect(subject.redis.hget('environments:ENV234', 'user')).to eq('')
       end
 
       it "should reply with notification" do
         alicia = Lita::User.create(123, name: "Alicia")
-        send_command('stopped using env ENV234', :as => alicia)
+        send_command('release ENV234', :as => alicia)
         expect(replies.first).to eq("You are not currently using ENV234")
       end
 
@@ -166,13 +166,13 @@ describe Lita::Handlers::Envy, lita_handler: true do
 
       it "should leave the environment untouched" do
         alicia = Lita::User.create(123, name: "Alicia")
-        send_command('stopped using env ENV234', :as => alicia)
+        send_command('release ENV234', :as => alicia)
         expect(subject.redis.hget('environments:ENV234', 'user')).to be_nil
       end
 
       it "should reply with notification" do
         alicia = Lita::User.create(123, name: "Alicia")
-        send_command('stopped using env ENV234', :as => alicia)
+        send_command('release ENV234', :as => alicia)
         expect(replies.first).to eq("You are not currently using ENV234")
       end
 
@@ -186,7 +186,7 @@ describe Lita::Handlers::Envy, lita_handler: true do
       subject.redis.hset('environments:ENV123', 'user', 'Alicia')
       subject.redis.hset('environments:ENV234', 'user', 'Carl')
       subject.redis.hset('environments:ENV345', 'user', '')
-      send_command('environments')
+      send_command('envs')
       expect(replies.first.split("\n")).to eq([
         "ENV123 (Alicia)",
         "ENV234 (Carl)",
@@ -204,13 +204,13 @@ describe Lita::Handlers::Envy, lita_handler: true do
         subject.redis.hset('environments:ENV345', 'user', '')
       end
 
-      it "should remove environments" do
-        send_command('remove env ENV345')
+      it "should forgetironments" do
+        send_command('forget ENV345')
         expect(subject.redis.keys).to_not include('environments:ENV345')
       end
 
       it "should confirm" do
-        send_command('remove env ENV345')
+        send_command('forget ENV345')
         expect(replies.first).to eq("ok")
       end
 
@@ -223,7 +223,7 @@ describe Lita::Handlers::Envy, lita_handler: true do
       end
 
       it "should reply with notification" do
-        send_command('remove env ENV345')
+        send_command('forget ENV345')
         expect(replies.first).to eq("I do not know about environment ENV345")
       end
 
@@ -237,12 +237,12 @@ describe Lita::Handlers::Envy, lita_handler: true do
 
       it "should leave the environment untouched" do
         alicia = Lita::User.create(123, name: "Alicia")
-        send_command('remove env ENV345', :as => alicia)
+        send_command('forget ENV345', :as => alicia)
         expect(subject.redis.hget('environments:ENV345', 'user')).to eq('Carl')
       end
 
       it "should reply with notification" do
-        send_command('remove env ENV345')
+        send_command('forget ENV345')
         expect(replies.first).to eq("Sorry, ENV345 is currently in use by Carl")
       end
 
@@ -256,13 +256,13 @@ describe Lita::Handlers::Envy, lita_handler: true do
 
       it "should leave the environment untouched" do
         alicia = Lita::User.create(123, name: "Alicia")
-        send_command('remove env ENV345', :as => alicia)
+        send_command('forget ENV345', :as => alicia)
         expect(subject.redis.hget('environments:ENV345', 'user')).to eq('Alicia')
       end
 
       it "should reply with notification" do
         alicia = Lita::User.create(123, name: "Alicia")
-        send_command('remove env ENV345', :as => alicia)
+        send_command('forget ENV345', :as => alicia)
         expect(replies.first).to eq("You are currently using ENV345")
       end
 
@@ -280,12 +280,12 @@ describe Lita::Handlers::Envy, lita_handler: true do
 
       it "should mark environment as in use" do
         carl = Lita::User.create(123, name: "Carl")
-        send_command('wrestle env ENV123 from Alicia', :as => carl)
+        send_command('wrestle ENV123 from Alicia', :as => carl)
         expect(subject.redis.hget('environments:ENV123', 'user')).to eq("Carl")
       end
 
       it "should reply with confirmation" do
-        send_command('wrestle env ENV123 from Alicia')
+        send_command('wrestle ENV123 from Alicia')
         expect(replies.first).to eq("ok")
       end
 
@@ -299,12 +299,12 @@ describe Lita::Handlers::Envy, lita_handler: true do
 
       it "should leave the environment untouched" do
         carl = Lita::User.create(123, name: "Carl")
-        send_command('wrestle env ENV123 from Ben', :as => carl)
+        send_command('wrestle ENV123 from Ben', :as => carl)
         expect(subject.redis.hget('environments:ENV123', 'user')).to eq("Alicia")
       end
 
       it "should reply with notification" do
-        send_command('wrestle env ENV123 from Ben')
+        send_command('wrestle ENV123 from Ben')
         expect(replies.first).to eq("Sorry, ENV123 is currently in use by Alicia, not Ben")
       end
 
@@ -318,12 +318,12 @@ describe Lita::Handlers::Envy, lita_handler: true do
 
       it "should leave the environment untouched" do
         carl = Lita::User.create(123, name: "Carl")
-        send_command('wrestle env ENV123 from Ben', :as => carl)
+        send_command('wrestle ENV123 from Ben', :as => carl)
         expect(subject.redis.hget('environments:ENV123', 'user')).to be_empty
       end
 
       it "should reply with notification" do
-        send_command('wrestle env ENV123 from Ben')
+        send_command('wrestle ENV123 from Ben')
         expect(replies.first).to eq("Sorry, ENV123 is not currently in use")
       end
 
@@ -337,13 +337,13 @@ describe Lita::Handlers::Envy, lita_handler: true do
 
       it "should leave the environment untouched" do
         carl = Lita::User.create(123, name: "Carl")
-        send_command('wrestle env ENV123 from Ben', :as => carl)
+        send_command('wrestle ENV123 from Ben', :as => carl)
         expect(subject.redis.hget('environments:ENV123', 'user')).to eq('Carl')
       end
 
       it "should reply with notification" do
         carl = Lita::User.create(123, name: "Carl")
-        send_command('wrestle env ENV123 from Ben', :as => carl)
+        send_command('wrestle ENV123 from Ben', :as => carl)
         expect(replies.first).to eq("You are already using ENV123")
       end
 

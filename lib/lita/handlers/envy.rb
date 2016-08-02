@@ -2,13 +2,13 @@ module Lita
   module Handlers
     class Envy < Handler
 
-      route /\Astarted using env ([A-Za-z0-9_]+)\Z/,  :start_using_environment, help:  { "started using env [ENV ID]"  => "Mark environment as in use by you"}, command: true
-      route /\Astopped using env ([A-Za-z0-9_]+)\Z/,  :stop_using_environment, help:  { "stopped using env [ENV ID]"  => "Mark environment as available"}, command: true
-      route /\Aenvironments\Z/,                       :list_environments, help:  { "environments"  => "List environments"}, command: true
-      route /\Aremove env ([A-Za-z0-9_]+)\Z/,         :remove_environment, help:  { "remove env [ENV ID]"  => "Remove environment"}, command: true
-      route /\Awrestle env ([A-Za-z0-9_]+) from (.*)\Z/, :wrestle_environment_from_user, help:  { "wrestle env [ENV ID] from [USER]"  => "Mark environment as in use by you, even though it is currently in use by another user"}, command: true
+      route /\Aclaim ([A-Za-z0-9_]+)\Z/,             :claim_environment, help:  { "claim [ENV ID]"  => "Mark environment as in use by you"}, command: true
+      route /\Arelease ([A-Za-z0-9_]+)\Z/,           :release_environment, help:  { "release [ENV ID]"  => "Mark environment as available"}, command: true
+      route /\Aenvs\Z/,                              :list_environments, help:  { "envs"  => "List environments"}, command: true
+      route /\Aforget ([A-Za-z0-9_]+)\Z/,            :forget_environment, help:  { "forget [ENV ID]"  => "Forget environment"}, command: true
+      route /\Awrestle ([A-Za-z0-9_]+) from (.*)\Z/, :claim_used_environment, help:  { "wrestle [ENV ID] from [USER]"  => "Mark environment as in use by you, even though it is currently in use by another user"}, command: true
 
-      def start_using_environment(response)
+      def claim_environment(response)
         env_id = response.matches.first.first
         current_user = redis.hget(['environments', env_id].join(':'), 'user')
         if current_user.nil? || current_user.empty?
@@ -21,7 +21,7 @@ module Lita
         end
       end
 
-      def stop_using_environment(response)
+      def release_environment(response)
         env_id = response.matches.first.first
         current_user = redis.hget(['environments', env_id].join(':'), 'user')
         if current_user == response.user.name
@@ -47,7 +47,7 @@ module Lita
         response.reply(lines.join("\n"))
       end
 
-      def remove_environment(response)
+      def forget_environment(response)
         env_id = response.matches.first.first
         current_user = redis.hget(['environments', env_id].join(':'), 'user')
         if current_user == response.user.name
@@ -62,7 +62,7 @@ module Lita
         end
       end
 
-      def wrestle_environment_from_user(response)
+      def claim_used_environment(response)
         env_id, specified_user = response.matches.first
         current_user = redis.hget(['environments', env_id].join(':'), 'user')
         if specified_user == current_user
