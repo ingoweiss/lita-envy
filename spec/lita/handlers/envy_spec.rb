@@ -68,7 +68,7 @@ describe Lita::Handlers::Envy, lita_handler: true do
         subject.redis.hset('environments:ENV123', 'user', 'Alicia')
         carl = Lita::User.create(123, name: "Carl")
         send_command('claim ENV123', :as => carl)
-        expect(replies.first).to eq("Sorry, ENV123 is currently in use by Alicia")
+        expect(replies.first).to eq("Hmm, ENV123 is currently in use by Alicia")
       end
 
     end
@@ -89,7 +89,7 @@ describe Lita::Handlers::Envy, lita_handler: true do
         subject.redis.hset('environments:ENV123', 'user', 'Carl')
         carl = Lita::User.create(123, name: "Carl")
         send_command('claim ENV123', :as => carl)
-        expect(replies.first).to eq("You are already using ENV123")
+        expect(replies.first).to eq("Hmm, you are already using ENV123")
       end
 
     end
@@ -133,7 +133,7 @@ describe Lita::Handlers::Envy, lita_handler: true do
       it "should reply with notification" do
         alicia = Lita::User.create(123, name: "Alicia")
         send_command('release ENV234', :as => alicia)
-        expect(replies.first).to eq("You are not currently using ENV234 (Carl is)")
+        expect(replies.first).to eq("Hmm, you are not currently using ENV234 (Carl is)")
       end
 
     end
@@ -153,7 +153,7 @@ describe Lita::Handlers::Envy, lita_handler: true do
       it "should reply with notification" do
         alicia = Lita::User.create(123, name: "Alicia")
         send_command('release ENV234', :as => alicia)
-        expect(replies.first).to eq("You are not currently using ENV234")
+        expect(replies.first).to eq("Hmm, you are not currently using ENV234")
       end
 
     end
@@ -173,7 +173,7 @@ describe Lita::Handlers::Envy, lita_handler: true do
       it "should reply with notification" do
         alicia = Lita::User.create(123, name: "Alicia")
         send_command('release ENV234', :as => alicia)
-        expect(replies.first).to eq("You are not currently using ENV234")
+        expect(replies.first).to eq("Hmm, you are not currently using ENV234")
       end
 
     end
@@ -224,7 +224,7 @@ describe Lita::Handlers::Envy, lita_handler: true do
 
       it "should reply with notification" do
         send_command('forget ENV345')
-        expect(replies.first).to eq("I do not know about environment ENV345")
+        expect(replies.first).to eq("Hmm, I do not know about ENV345")
       end
 
     end
@@ -243,7 +243,7 @@ describe Lita::Handlers::Envy, lita_handler: true do
 
       it "should reply with notification" do
         send_command('forget ENV345')
-        expect(replies.first).to eq("Sorry, ENV345 is currently in use by Carl")
+        expect(replies.first).to eq("Hmm, ENV345 is currently in use by Carl")
       end
 
     end
@@ -263,7 +263,7 @@ describe Lita::Handlers::Envy, lita_handler: true do
       it "should reply with notification" do
         alicia = Lita::User.create(123, name: "Alicia")
         send_command('forget ENV345', :as => alicia)
-        expect(replies.first).to eq("You are currently using ENV345")
+        expect(replies.first).to eq("Hmm, you are currently using ENV345")
       end
 
     end
@@ -305,7 +305,7 @@ describe Lita::Handlers::Envy, lita_handler: true do
 
       it "should reply with notification" do
         send_command('wrestle ENV123 from Ben')
-        expect(replies.first).to eq("Sorry, ENV123 is currently in use by Alicia, not Ben")
+        expect(replies.first).to eq("Hmm, ENV123 is currently in use by Alicia, not Ben")
       end
 
     end
@@ -324,7 +324,7 @@ describe Lita::Handlers::Envy, lita_handler: true do
 
       it "should reply with notification" do
         send_command('wrestle ENV123 from Ben')
-        expect(replies.first).to eq("Sorry, ENV123 is not currently in use")
+        expect(replies.first).to eq("Hmm, ENV123 is not currently in use")
       end
 
     end
@@ -344,7 +344,7 @@ describe Lita::Handlers::Envy, lita_handler: true do
       it "should reply with notification" do
         carl = Lita::User.create(123, name: "Carl")
         send_command('wrestle ENV123 from Ben', :as => carl)
-        expect(replies.first).to eq("You are already using ENV123")
+        expect(replies.first).to eq("Hmm, you are already using ENV123")
       end
 
     end

@@ -15,9 +15,9 @@ module Lita
           redis.hset(['environments', env_id].join(':'), 'user', response.user.name)
           response.reply('ok')
         elsif current_user == response.user.name
-          response.reply("You are already using #{env_id}")
+          response.reply("Hmm, you are already using #{env_id}")
         else
-          response.reply("Sorry, #{env_id} is currently in use by #{current_user}")
+          response.reply("Hmm, #{env_id} is currently in use by #{current_user}")
         end
       end
 
@@ -28,9 +28,9 @@ module Lita
           redis.hset(['environments', env_id].join(':'), 'user', nil)
           response.reply('ok')
         elsif current_user.nil? || current_user.empty?
-          response.reply("You are not currently using #{env_id}")
+          response.reply("Hmm, you are not currently using #{env_id}")
         else
-          response.reply("You are not currently using #{env_id} (#{current_user} is)")
+          response.reply("Hmm, you are not currently using #{env_id} (#{current_user} is)")
         end
 
       end
@@ -51,14 +51,14 @@ module Lita
         env_id = response.matches.first.first
         current_user = redis.hget(['environments', env_id].join(':'), 'user')
         if current_user == response.user.name
-          response.reply("You are currently using #{env_id}")
+          response.reply("Hmm, you are currently using #{env_id}")
         elsif current_user.nil?
-          response.reply("I do not know about environment #{env_id}")
+          response.reply("Hmm, I do not know about #{env_id}")
         elsif current_user.empty?
           redis.del(['environments', env_id].join(':'))
           response.reply('ok')
         else
-          response.reply("Sorry, #{env_id} is currently in use by #{current_user}")
+          response.reply("Hmm, #{env_id} is currently in use by #{current_user}")
         end
       end
 
@@ -69,11 +69,11 @@ module Lita
           redis.hset(['environments', env_id].join(':'), 'user', response.user.name)
           response.reply('ok')
         elsif current_user.nil? or current_user.empty?
-          response.reply("Sorry, #{env_id} is not currently in use")
+          response.reply("Hmm, #{env_id} is not currently in use")
         elsif current_user == response.user.name
-          response.reply("You are already using #{env_id}")
+          response.reply("Hmm, you are already using #{env_id}")
         else
-          response.reply("Sorry, #{env_id} is currently in use by #{current_user}, not #{specified_user}")
+          response.reply("Hmm, #{env_id} is currently in use by #{current_user}, not #{specified_user}")
         end
       end
 
