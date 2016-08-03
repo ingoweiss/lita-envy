@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name          = "lita-envy"
-  spec.version       = "0.1.3"
+  spec.version       = "0.1.4"
   spec.authors       = ["Ingo Weiss"]
   spec.email         = ["ingo@ingoweiss.com"]
   spec.description   = "Helps with management of environment ussage. Adds commands for claiming and releasing environments"
