@@ -208,7 +208,7 @@ describe Lita::Handlers::Envy, lita_handler: true do
         subject.redis.hset('environments:my_project:ENV345', 'user', '')
       end
 
-      it "should forgetironments" do
+      it "should forget environment" do
         send_command('forget ENV345')
         expect(subject.redis.keys).to_not include('environments:my_project:ENV345')
       end
