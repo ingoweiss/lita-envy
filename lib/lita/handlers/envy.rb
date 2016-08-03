@@ -43,7 +43,7 @@ module Lita
 
       def list_environments(response)
         lines = []
-        redis.keys('environments:*').sort.each do |key|
+        redis.keys(key('*')).sort.each do |key|
           env_id = key.split(':').last
           user = redis.hget(key, 'user')
           line = env_id
