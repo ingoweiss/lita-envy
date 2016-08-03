@@ -353,6 +353,20 @@ describe Lita::Handlers::Envy, lita_handler: true do
 
     end
 
+    context "when environment is unknown to bot" do
+
+      before(:each) do
+        subject.redis.del('environments:my_project:ENV123')
+      end
+
+      it "should reply with notification" do
+        carl = Lita::User.create(123, name: "Carl")
+        send_command('wrestle ENV123 from Ben', :as => carl)
+        expect(replies.first).to eq("Hmm, I do not know about ENV123")
+      end
+
+    end
+
   end
 
 end
