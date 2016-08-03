@@ -8,11 +8,17 @@ module Lita
       route /\Aforget ([A-Za-z0-9_]+)\Z/,            :forget_environment, help:  { "forget [ENV ID]"  => "Forget environment"}, command: true
       route /\Awrestle ([A-Za-z0-9_]+) from (.*)\Z/, :claim_used_environment, help:  { "wrestle [ENV ID] from [USER]"  => "Mark environment as in use by you, even though it is currently in use by another user"}, command: true
 
+      config :namespace, :required => true do
+        validate do |value|
+          "can only contain lowercase letters, numbers and underscores" unless value.match(/\A[a-z0-9_]+\Z/)
+        end
+      end
+
       def claim_environment(response)
         env_id = response.matches.first.first
-        current_user = redis.hget(['environments', env_id].join(':'), 'user')
+        current_user = redis.hget(['environments', config.namespace, env_id].join(':'), 'user')
         if current_user.nil? || current_user.empty?
-          redis.hset(['environments', env_id].join(':'), 'user', response.user.name)
+          redis.hset(['environments', config.namespace, env_id].join(':'), 'user', response.user.name)
           response.reply('ok')
         elsif current_user == response.user.name
           response.reply("Hmm, you are already using #{env_id}")
@@ -23,9 +29,9 @@ module Lita
 
       def release_environment(response)
         env_id = response.matches.first.first
-        current_user = redis.hget(['environments', env_id].join(':'), 'user')
+        current_user = redis.hget(['environments', config.namespace, env_id].join(':'), 'user')
         if current_user == response.user.name
-          redis.hset(['environments', env_id].join(':'), 'user', nil)
+          redis.hset(['environments', config.namespace, env_id].join(':'), 'user', nil)
           response.reply('ok')
         elsif current_user.nil? || current_user.empty?
           response.reply("Hmm, you are not currently using #{env_id}")
@@ -49,13 +55,13 @@ module Lita
 
       def forget_environment(response)
         env_id = response.matches.first.first
-        current_user = redis.hget(['environments', env_id].join(':'), 'user')
+        current_user = redis.hget(['environments', config.namespace, env_id].join(':'), 'user')
         if current_user == response.user.name
           response.reply("Hmm, you are currently using #{env_id}")
         elsif current_user.nil?
           response.reply("Hmm, I do not know about #{env_id}")
         elsif current_user.empty?
-          redis.del(['environments', env_id].join(':'))
+          redis.del(['environments', config.namespace, env_id].join(':'))
           response.reply('ok')
         else
           response.reply("Hmm, #{env_id} is currently in use by #{current_user}")
@@ -64,9 +70,9 @@ module Lita
 
       def claim_used_environment(response)
         env_id, specified_user = response.matches.first
-        current_user = redis.hget(['environments', env_id].join(':'), 'user')
+        current_user = redis.hget(['environments', config.namespace, env_id].join(':'), 'user')
         if specified_user == current_user
-          redis.hset(['environments', env_id].join(':'), 'user', response.user.name)
+          redis.hset(['environments', config.namespace, env_id].join(':'), 'user', response.user.name)
           response.reply('ok')
         elsif current_user.nil? or current_user.empty?
           response.reply("Hmm, #{env_id} is not currently in use")
