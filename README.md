@@ -13,6 +13,12 @@ Add lita-envy to your Lita instance's Gemfile:
 gem "lita-envy"
 ```
 
+## Configuration
+
+``` ruby
+config.handlers.envy.namespace = 'my_project'
+```
+
 ## Usage
 
 ``` bash
