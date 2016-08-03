@@ -19,11 +19,11 @@ module Lita
         current_user = redis.hget(key(env_id), 'user')
         if current_user.nil? || current_user.empty?
           redis.hset(key(env_id), 'user', response.user.name)
-          response.reply('ok')
+          response.reply(t('claim_environment.success'))
         elsif current_user == response.user.name
-          response.reply("Hmm, you are already using #{env_id}")
+          response.reply(t('claim_environment.failure.in_use_by_user', :env_id => env_id))
         else
-          response.reply("Hmm, #{env_id} is currently in use by #{current_user}")
+          response.reply(t('claim_environment.failure.in_use_by_other_user', :env_id => env_id, :user => current_user))
         end
       end
 
@@ -32,13 +32,13 @@ module Lita
         current_user = redis.hget(key(env_id), 'user')
         if current_user == response.user.name
           redis.hset(key(env_id), 'user', nil)
-          response.reply('ok')
+          response.reply(t('release_environment.success'))
         elsif current_user.nil?
-          response.reply("Hmm, I do not know about ENV234")
+          response.reply(t('release_environment.failure.unknown', :env_id => env_id))
         elsif current_user.empty?
-          response.reply("Hmm, you are not currently using #{env_id}")
+          response.reply(t('release_environment.failure.not_in_use_by_user', :env_id => env_id))
         else
-          response.reply("Hmm, you are not currently using #{env_id} (#{current_user} is)")
+          response.reply(t('release_environment.failure.in_use_by_other_user', :env_id => env_id, :user => current_user))
         end
 
       end
@@ -59,14 +59,14 @@ module Lita
         env_id = response.matches.first.first
         current_user = redis.hget(key(env_id), 'user')
         if current_user == response.user.name
-          response.reply("Hmm, you are currently using #{env_id}")
+          response.reply(t('forget_environment.failure.in_use_by_user', :env_id => env_id))
         elsif current_user.nil?
-          response.reply("Hmm, I do not know about #{env_id}")
+          response.reply(t('forget_environment.failure.unknown', :env_id => env_id))
         elsif current_user.empty?
           redis.del(key(env_id))
-          response.reply('ok')
+          response.reply(t('forget_environment.success'))
         else
-          response.reply("Hmm, #{env_id} is currently in use by #{current_user}")
+          response.reply(t('forget_environment.failure.in_use_by_other_user', :env_id => env_id, :user => current_user))
         end
       end
 
@@ -75,13 +75,15 @@ module Lita
         current_user = redis.hget(key(env_id), 'user')
         if specified_user == current_user
           redis.hset(key(env_id), 'user', response.user.name)
-          response.reply('ok')
-        elsif current_user.nil? or current_user.empty?
-          response.reply("Hmm, #{env_id} is not currently in use")
+          response.reply(t('claim_used_environment.success'))
+        elsif current_user.nil?
+          response.reply(t('claim_used_environment.failure.unknown', :env_id => env_id))
+        elsif current_user.empty?
+          response.reply(t('claim_used_environment.failure.not_in_use', :env_id => env_id))
         elsif current_user == response.user.name
-          response.reply("Hmm, you are already using #{env_id}")
+          response.reply(t('claim_used_environment.failure.in_use_by_user', :env_id => env_id))
         else
-          response.reply("Hmm, #{env_id} is currently in use by #{current_user}, not #{specified_user}")
+          response.reply(t('claim_used_environment.failure.in_use_by_user_other_than_specified_one', :env_id => env_id, :user => current_user, :specified_user => specified_user))
         end
       end
 

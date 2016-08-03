@@ -2,3 +2,28 @@ en:
   lita:
     handlers:
       envy:
+        claim_environment:
+          success: ok
+          failure:
+            in_use_by_user: "Hmm, you are already using %{env_id}"
+            in_use_by_other_user: "Hmm, %{env_id} is currently in use by %{user}"
+        release_environment:
+          success: ok
+          failure:
+            unknown: "Hmm, I do not know about %{env_id}"
+            not_in_use_by_user: "Hmm, you are not currently using %{env_id}"
+            in_use_by_other_user: "Hmm, you are not currently using %{env_id} (%{user} is)"
+        forget_environment:
+          success: ok
+          failure:
+            unknown: "Hmm, I do not know about %{env_id}"
+            in_use_by_user: "Hmm, you are currently using %{env_id}"
+            in_use_by_other_user: "Hmm, %{env_id} is currently in use by %{user}"
+        claim_used_environment:
+          success: ok
+          failure:
+            unknown: "Hmm, I do not know about %{env_id}"
+            not_in_use: "Hmm, %{env_id} is not currently in use"
+            in_use_by_user: "Hmm, you are already using %{env_id}"
+            in_use_by_user_other_than_specified_one: "Hmm, %{env_id} is currently in use by %{user}, not %{specified_user}"
+
