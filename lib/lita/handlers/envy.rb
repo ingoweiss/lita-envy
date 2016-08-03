@@ -33,7 +33,9 @@ module Lita
         if current_user == response.user.name
           redis.hset(key(env_id), 'user', nil)
           response.reply('ok')
-        elsif current_user.nil? || current_user.empty?
+        elsif current_user.nil?
+          response.reply("Hmm, I do not know about ENV234")
+        elsif current_user.empty?
           response.reply("Hmm, you are not currently using #{env_id}")
         else
           response.reply("Hmm, you are not currently using #{env_id} (#{current_user} is)")

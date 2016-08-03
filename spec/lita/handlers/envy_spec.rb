@@ -177,7 +177,7 @@ describe Lita::Handlers::Envy, lita_handler: true do
       it "should reply with notification" do
         alicia = Lita::User.create(123, name: "Alicia")
         send_command('release ENV234', :as => alicia)
-        expect(replies.first).to eq("Hmm, you are not currently using ENV234")
+        expect(replies.first).to eq("Hmm, I do not know about ENV234")
       end
 
     end
