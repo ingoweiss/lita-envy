@@ -16,31 +16,33 @@ module Lita
 
       def claim_environment(response)
         env_id = response.matches.first.first
-        current_user = current_user(env_id)
-        if current_user.nil? || current_user.empty?
+        case current_user(env_id)
+        when nil
           redis.hset(key(env_id), 'user', response.user.name)
           response.reply t('claim_environment.success')
-        elsif current_user == response.user.name
+        when ''
+          redis.hset(key(env_id), 'user', response.user.name)
+          response.reply t('claim_environment.success')
+        when response.user.name
           response.reply t('claim_environment.failure.env_in_use_by_user', :env_id => env_id)
         else
-          response.reply t('claim_environment.failure.env_in_use_by_other_user', :env_id => env_id, :user => current_user)
+          response.reply t('claim_environment.failure.env_in_use_by_other_user', :env_id => env_id, :user => current_user(env_id))
         end
       end
 
       def release_environment(response)
         env_id = response.matches.first.first
-        current_user = current_user(env_id)
-        if current_user == response.user.name
+        case current_user(env_id)
+        when nil
+          response.reply t('release_environment.failure.env_unknown', :env_id => env_id)
+        when ''
+          response.reply t('release_environment.failure.env_not_in_use_by_user', :env_id => env_id)
+        when response.user.name
           redis.hset(key(env_id), 'user', nil)
           response.reply t('release_environment.success')
-        elsif current_user.nil?
-          response.reply t('release_environment.failure.env_unknown', :env_id => env_id)
-        elsif current_user.empty?
-          response.reply t('release_environment.failure.env_not_in_use_by_user', :env_id => env_id)
         else
-          response.reply t('release_environment.failure.env_in_use_by_other_user', :env_id => env_id, :user => current_user)
+          response.reply t('release_environment.failure.env_in_use_by_other_user', :env_id => env_id, :user => current_user(env_id))
         end
-
       end
 
       def list_environments(response)
@@ -57,33 +59,33 @@ module Lita
 
       def forget_environment(response)
         env_id = response.matches.first.first
-        current_user = current_user(env_id)
-        if current_user == response.user.name
-          response.reply t('forget_environment.failure.env_in_use_by_user', :env_id => env_id)
-        elsif current_user.nil?
+        case current_user(env_id)
+        when nil
           response.reply t('forget_environment.failure.env_unknown', :env_id => env_id)
-        elsif current_user.empty?
+        when ''
           redis.del(key(env_id))
           response.reply t('forget_environment.success')
+        when response.user.name
+          response.reply t('forget_environment.failure.env_in_use_by_user', :env_id => env_id)
         else
-          response.reply t('forget_environment.failure.env_in_use_by_other_user', :env_id => env_id, :user => current_user)
+          response.reply t('forget_environment.failure.env_in_use_by_other_user', :env_id => env_id, :user => current_user(env_id))
         end
       end
 
       def claim_used_environment(response)
         env_id, specified_user = response.matches.first
-        current_user = current_user(env_id)
-        if specified_user == current_user
+        case current_user(env_id)
+        when nil
+          response.reply t('claim_used_environment.failure.env_unknown', :env_id => env_id)
+        when ''
+          response.reply t('claim_used_environment.failure.env_not_in_use', :env_id => env_id)
+        when response.user.name
+          response.reply t('claim_used_environment.failure.env_in_use_by_user', :env_id => env_id)
+        when specified_user
           redis.hset(key(env_id), 'user', response.user.name)
           response.reply t('claim_used_environment.success')
-        elsif current_user.nil?
-          response.reply t('claim_used_environment.failure.env_unknown', :env_id => env_id)
-        elsif current_user.empty?
-          response.reply t('claim_used_environment.failure.env_not_in_use', :env_id => env_id)
-        elsif current_user == response.user.name
-          response.reply t('claim_used_environment.failure.env_in_use_by_user', :env_id => env_id)
         else
-          response.reply t('claim_used_environment.failure.env_in_use_by_user_other_than_specified_one', :env_id => env_id, :user => current_user, :specified_user => specified_user)
+          response.reply t('claim_used_environment.failure.env_in_use_by_user_other_than_specified_one', :env_id => env_id, :user => current_user(env_id), :specified_user => specified_user)
         end
       end
 
