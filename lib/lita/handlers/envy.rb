@@ -54,7 +54,11 @@ module Lita
           line += " (#{user})" unless user.empty?
           lines << line
         end
-        response.reply(lines.join("\n"))
+        if lines.any?
+          response.reply(lines.join("\n"))
+        else
+          response.reply t('list_environments.failure.no_environments')
+        end
       end
 
       def forget_environment(response)

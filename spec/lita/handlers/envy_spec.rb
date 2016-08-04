@@ -186,16 +186,32 @@ describe Lita::Handlers::Envy, lita_handler: true do
 
   describe 'User listing environments' do
 
-    it "should list environments" do
-      subject.redis.hset('environments:my_project:ENV123', 'user', 'Alicia')
-      subject.redis.hset('environments:my_project:ENV234', 'user', 'Carl')
-      subject.redis.hset('environments:my_project:ENV345', 'user', '')
-      send_command('envs')
-      expect(replies.first.split("\n")).to eq([
-        "ENV123 (Alicia)",
-        "ENV234 (Carl)",
-        "ENV345"
-      ])
+    context "with environments recorded" do
+
+      before(:each) do
+        subject.redis.hset('environments:my_project:ENV345', 'user', '')
+        subject.redis.hset('environments:my_project:ENV123', 'user', 'Alicia')
+        subject.redis.hset('environments:my_project:ENV234', 'user', 'Carl')
+      end
+
+      it "should list environments" do
+        send_command('envs')
+        expect(replies.first.split("\n")).to eq([
+          "ENV123 (Alicia)",
+          "ENV234 (Carl)",
+          "ENV345"
+        ])
+      end
+
+    end
+
+    context "with no environments recorded" do
+
+      it "should respond with notification" do
+        send_command('envs')
+        expect(replies.first).to eq("I do not know about any environments yet")
+      end
+
     end
 
   end

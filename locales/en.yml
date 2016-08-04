@@ -26,4 +26,7 @@ en:
             env_not_in_use: "Hmm, %{env_id} is not currently in use"
             env_in_use_by_user: "Hmm, you are already using %{env_id}"
             env_in_use_by_user_other_than_specified_one: "Hmm, %{env_id} is currently in use by %{user}, not %{specified_user}"
+        list_environments:
+          failure:
+            no_environments: "I do not know about any environments yet"
 
