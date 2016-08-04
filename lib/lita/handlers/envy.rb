@@ -16,7 +16,7 @@ module Lita
 
       def claim_environment(response)
         env_id = response.matches.first.first
-        current_user = redis.hget(key(env_id), 'user')
+        current_user = current_user(env_id)
         if current_user.nil? || current_user.empty?
           redis.hset(key(env_id), 'user', response.user.name)
           response.reply t('claim_environment.success')
@@ -29,7 +29,7 @@ module Lita
 
       def release_environment(response)
         env_id = response.matches.first.first
-        current_user = redis.hget(key(env_id), 'user')
+        current_user = current_user(env_id)
         if current_user == response.user.name
           redis.hset(key(env_id), 'user', nil)
           response.reply t('release_environment.success')
@@ -57,7 +57,7 @@ module Lita
 
       def forget_environment(response)
         env_id = response.matches.first.first
-        current_user = redis.hget(key(env_id), 'user')
+        current_user = current_user(env_id)
         if current_user == response.user.name
           response.reply t('forget_environment.failure.env_in_use_by_user', :env_id => env_id)
         elsif current_user.nil?
@@ -72,7 +72,7 @@ module Lita
 
       def claim_used_environment(response)
         env_id, specified_user = response.matches.first
-        current_user = redis.hget(key(env_id), 'user')
+        current_user = current_user(env_id)
         if specified_user == current_user
           redis.hset(key(env_id), 'user', response.user.name)
           response.reply t('claim_used_environment.success')
@@ -91,6 +91,10 @@ module Lita
 
       def key(env_id)
         ['environments', config.namespace, env_id].join(':')
+      end
+
+      def current_user(env_id)
+        redis.hget(key(env_id), 'user')
       end
 
       Lita.register_handler(self)
