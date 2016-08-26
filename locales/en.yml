@@ -3,24 +3,24 @@ en:
     handlers:
       envy:
         claim_environment:
-          success: ok
+          success: It's all yours!
           failure:
             env_in_use_by_user: "Hmm, you are already using %{env_id}"
             env_in_use_by_other_user: "Hmm, %{env_id} is currently in use by %{user}"
         release_environment:
-          success: ok
+          success: Thanks!
           failure:
             env_unknown: "Hmm, I do not know about %{env_id}"
             env_not_in_use_by_user: "Hmm, you are not currently using %{env_id}"
             env_in_use_by_other_user: "Hmm, you are not currently using %{env_id} (%{user} is)"
         forget_environment:
-          success: ok
+          success: Poof! It's gone!
           failure:
             env_unknown: "Hmm, I do not know about %{env_id}"
             env_in_use_by_user: "Hmm, you are currently using %{env_id}"
             env_in_use_by_other_user: "Hmm, %{env_id} is currently in use by %{user}"
         claim_used_environment:
-          success: ok
+          success: It's all yours!
           failure:
             env_unknown: "Hmm, I do not know about %{env_id}"
             env_not_in_use: "Hmm, %{env_id} is not currently in use"
@@ -28,5 +28,5 @@ en:
             env_in_use_by_user_other_than_specified_one: "Hmm, %{env_id} is currently in use by %{user}, not %{specified_user}"
         list_environments:
           failure:
-            no_environments: "I do not know about any environments yet"
+            no_environments: "Hmm, I do not know about any environments yet"
 

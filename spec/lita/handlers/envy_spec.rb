@@ -32,7 +32,7 @@ describe Lita::Handlers::Envy, lita_handler: true do
 
       it "should reply with confirmation" do
         send_command('claim ENV123')
-        expect(replies.first).to eq("ok")
+        expect(replies.first).to eq("It's all yours!")
       end
 
     end
@@ -51,7 +51,7 @@ describe Lita::Handlers::Envy, lita_handler: true do
 
       it "should reply with confirmation" do
         send_command('claim ENV123')
-        expect(replies.first).to eq("ok")
+        expect(replies.first).to eq("It's all yours!")
       end
 
     end
@@ -117,7 +117,7 @@ describe Lita::Handlers::Envy, lita_handler: true do
       it "should reply with confirmation" do
         alicia = Lita::User.create(123, name: "Alicia")
         send_command('release ENV234', :as => alicia)
-        expect(replies.first).to eq("ok")
+        expect(replies.first).to eq("Thanks!")
       end
 
     end
@@ -209,7 +209,7 @@ describe Lita::Handlers::Envy, lita_handler: true do
 
       it "should respond with notification" do
         send_command('envs')
-        expect(replies.first).to eq("I do not know about any environments yet")
+        expect(replies.first).to eq("Hmm, I do not know about any environments yet")
       end
 
     end
@@ -231,7 +231,7 @@ describe Lita::Handlers::Envy, lita_handler: true do
 
       it "should confirm" do
         send_command('forget ENV345')
-        expect(replies.first).to eq("ok")
+        expect(replies.first).to eq("Poof! It's gone!")
       end
 
     end
@@ -306,7 +306,7 @@ describe Lita::Handlers::Envy, lita_handler: true do
 
       it "should reply with confirmation" do
         send_command('wrestle ENV123 from Alicia')
-        expect(replies.first).to eq("ok")
+        expect(replies.first).to eq("It's all yours!")
       end
 
     end
